@@ -1,0 +1,17 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+}
+
+#c {
+    width: 100vw;
+    height: 100vh;
+}
+
+canvas {
+    image-rendering: pixelated;
+}
