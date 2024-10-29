@@ -6,7 +6,7 @@ import Champion from "../../creatures/champion";
 import JungleCreature from "../../creatures/jungle-creature";
 import Effect from "../../effects/Effect";
 import { AllInAreaEffectTarget, EffectTarget, SingleInRangeEffectTarget } from "../../effects/EffectTarget";
-import { GameContext } from "../GameController";
+import { GameContext } from "../GameController/GameController";
 import { AbilityTarget, SingleCreatureTargetInRangeAbilityTarget } from "@/abilities/AbilityTarget";
 
 interface BasicAttackEnhancement {

@@ -10,12 +10,14 @@ class CanvasGenerator {
     let canvasRenderingContext: CanvasRenderingContext2D;
     const canvas = document.createElement("canvas");
     const containerEl = document.getElementById("c");
+    canvas.id = "hexMapCanvas";
     if (containerEl) {
       const onContainerResize = () => {
         canvas.width = document.body.scrollWidth;
         canvas.height = document.body.scrollHeight;
-        canvasRenderingContext.imageSmoothingEnabled = false;
+        // canvasRenderingContext.imageSmoothingEnabled = true;
         canvasRenderingContext.translate(0.5, 0.5);
+        canvasRenderingContext.scale(1.4, 1.4);
         Dimensions.w = canvas.width;
         Dimensions.h = canvas.height;
       };

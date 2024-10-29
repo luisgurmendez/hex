@@ -1,3 +1,4 @@
+import { Creature } from "@/creatures/creatures";
 import { EffectBehavior } from "./Effect";
 
 interface AttackEffectOpts {
@@ -19,6 +20,12 @@ class BasicAttackEffect implements EffectBehavior {
         this.poison = poison ?? 0;
         this.piercing = piercing ?? false;
         this.freeze = freeze ?? false;
+    }
+
+    resolve(target: Creature[]) {
+        target.forEach(t => {
+            t.health.decrease(this.damage);
+        });
     }
 }
 

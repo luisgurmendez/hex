@@ -19,17 +19,21 @@ export enum EffectTargetType {
 
 export interface EffectBehavior {
     type: string;
+    resolve?(affectedCreatures: Creature[]): void;
 }
 
-type Effect = StatEffect | MovementEffect | EquipmentEffect | CancelingEffects | BasicAttackEffect;
+// type Effect = StatEffect | MovementEffect | EquipmentEffect | CancelingEffects | BasicAttackEffect;
 
 export class TargetedEffect {
-    constructor(public target: EffectTarget, public effect: Effect) { }
+    constructor(public target: EffectTarget, public effect: EffectBehavior) { }
 
     resolve(affectedCreatures: Creature[]) {
+        if (this.effect.resolve) {
+            this.effect.resolve(affectedCreatures);
+        }
         console.log('Resolving effect ', this.effect, ' on creatures', affectedCreatures);
     }
 }
 
-export default Effect;
+export default EffectBehavior;
 

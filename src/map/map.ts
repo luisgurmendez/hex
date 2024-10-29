@@ -28,8 +28,7 @@ export interface Tile<D> {
 
 class FlatTopHexagonMap<D> {
     tiles: Tile<D>[] = [];
-
-    constructor(private radius: number) {
+    constructor(public radius: number) {
         this.generateMap();
     }
 

@@ -1,7 +1,7 @@
 import { Creature } from "../creatures/creatures";
 import FlatTopHexagonMap, { Tile } from "../map/map";
 
-enum GameTileType {
+export enum GameTileType {
     jungle,
     revealedJungle,
     land,
@@ -14,12 +14,13 @@ export class GameTileData {
 export type GameTile = Tile<GameTileData>;
 
 class GameMap extends FlatTopHexagonMap<GameTileData> {
-
+    private creaturePositions = new Map<Creature, GameTile>();
     constructor(radius: number) {
         super(radius);
         this.forEach(tile => {
             tile.data = new GameTileData(GameTileType.land);
         });
+        this.creaturePositions = new Map();
     }
 
     moveCreature(creature: Creature, to: GameTile) {
@@ -28,6 +29,7 @@ class GameMap extends FlatTopHexagonMap<GameTileData> {
             from.data!.creatures.delete(creature);
         }
         to.data!.creatures.add(creature);
+        this.creaturePositions.set(creature, to);
     }
 
     getTileByCreature(creature: Creature): GameTile | null {

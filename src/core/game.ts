@@ -1,7 +1,7 @@
 import Clock from "./clock";
 import CanvasGenerator from "./canvas";
 import CustomKeyboard from "./keyboard";
-import GameController from "@/controllers/GameController";
+import GameController from "@/controllers/GameController/GameController";
 // import Stats from "stats.js";
 // export const keyboard = CustomKeyboard.getInstance();
 

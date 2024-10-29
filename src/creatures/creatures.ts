@@ -1,7 +1,6 @@
 import { BasicAttack } from "../attack/BasicAttack";
 import { FixedStat, RecoverableStat } from "./stats";
 
-
 export abstract class Creature {
     abstract name: string;
     abstract health: RecoverableStat;

@@ -4,7 +4,7 @@ import { Equipment } from "../../equipments/equipment";
 
 import AbilitiesController from "./AbilitiesController";
 import EquipmentController from "./EquipmentController";
-import { GameContext, GameState } from "../GameController";
+import { GameContext, GameState } from "../GameController/GameController";
 import MovementController from "./MovementController";
 import { GameTile } from "@/core/game-map";
 import { SingleInRangeEffectTarget } from "@/effects/EffectTarget";

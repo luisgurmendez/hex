@@ -5,8 +5,9 @@ import AbilitiesController from "./AbilitiesController";
 import CreatureActionsController, { CreatureActionsResolverController, PlayerCreatureAction, PlayerCreatureActionType } from "./CreatureActionsController";
 import EffectsController from "./EffectsController";
 import EquipmentController from "./EquipmentController";
-import { EffectsQueue, GameContext, GameState } from "../GameController";
+import { GameContext, GameState } from "../GameController/GameController";
 import MovementController from "./MovementController";
+import GameMap from "@/core/game-map";
 
 
 interface CreateControllerInjections {
@@ -17,6 +18,7 @@ interface CreateControllerInjections {
     ActionsController?: typeof CreatureActionsController;
 }
 
+// TODO: Make this abstract Champ and Jg should inherit
 class CreatureController {
     team: number;
     hand: AbilityOrEquipmentCard[] = [];
@@ -30,16 +32,16 @@ class CreatureController {
     equipmentController: EquipmentController
     movementController: MovementController;
 
-    constructor(champion: Champion, team: number, context: GameContext, injections: CreateControllerInjections) {
+    constructor(champion: Champion, team: number, context: GameContext, injections?: CreateControllerInjections) {
         this.team = team;
         this.champion = champion;
         this.context = context;
 
-        const abilitiesFactory = injections.AbilitiesController?.createController || AbilitiesController.createController;
-        const equipmentFactory = injections.EquipmentController?.createController || EquipmentController.createController;
-        const movementFactory = injections.MovementController?.createController || MovementController.createController;
-        const effectsFactory = injections.EffectsController?.createController || EffectsController.createController;
-        const actionsFactory = injections.ActionsController?.createController || CreatureActionsController.createController;
+        const abilitiesFactory = injections?.AbilitiesController?.createController ?? AbilitiesController.createController;
+        const equipmentFactory = injections?.EquipmentController?.createController ?? EquipmentController.createController;
+        const movementFactory = injections?.MovementController?.createController ?? MovementController.createController;
+        const effectsFactory = injections?.EffectsController?.createController ?? EffectsController.createController;
+        const actionsFactory = injections?.ActionsController?.createController ?? CreatureActionsController.createController;
 
         this.abilitiesController = abilitiesFactory(champion, context);
         this.equipmentController = equipmentFactory(champion)
@@ -54,15 +56,16 @@ class CreatureController {
         this.resetControllers();
 
         await this.effectsController.performInitialEffects();
-        this.drawCard(state.abilitiesAndEquipmentsDeck);
+        this.drawCard();
         let action: PlayerCreatureAction;
         do {
+            console.log(state);
             action = await this.actionsController.getNextAction(state);
             const effects = this.performAction(action);
             effectsQueue.push(...effects);
 
             await this.performInstantAbilities(state, this);
-            this.resolveEffects(effectsQueue);
+            this.resolveEffects(state);
         } while (action.type !== PlayerCreatureActionType.endOfTurn);
         this.effectsController.performEndOfTurnEffects();
     }
@@ -72,10 +75,9 @@ class CreatureController {
     };
 
     initGame() {
-        const state = this.context.getGameState();
-        this.drawCard(state.abilitiesAndEquipmentsDeck);
-        this.drawCard(state.abilitiesAndEquipmentsDeck);
-        this.drawCard(state.abilitiesAndEquipmentsDeck);
+        this.drawCard();
+        this.drawCard();
+        this.drawCard();
     }
 
     private resetControllers() {
@@ -95,21 +97,22 @@ class CreatureController {
     }
 
     private async performInstantAbilities(state: GameState, lastActionPlayedBy: CreatureController) {
-        const restOfPlayers = state.players.filter(player => player !== lastActionPlayedBy);
+        const restOfPlayers = state.creatures.controllers.filter(controller => controller !== lastActionPlayedBy);
         for (const player of restOfPlayers) {
             const effects = await player.castInstantAbility();
             state.effectsQueue.push(...effects);
-            if (effects) {
+            if (effects.length > 0) {
                 await this.performInstantAbilities(state, player);
             }
         }
     }
 
-    private resolveEffects(effectsQueue: EffectsQueue) {
-        // this.effectsController.resolveEffects(effectsQueue);
+    private resolveEffects(state: GameState) {
+        this.effectsController.resolveEffects(state);
     }
 
-    private drawCard(deck: AbilitiesAndEquipmentsDeck) {
+    private drawCard() {
+        const deck = this.context.getGameState().abilitiesAndEquipmentsDeck;
         this.hand.push(deck.drawCard());
     }
 

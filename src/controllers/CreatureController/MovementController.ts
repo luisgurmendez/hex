@@ -5,7 +5,7 @@ const DEFAULT_MOVEMENTS = 1;
 
 class MovementController {
 
-    constructor(public movementsLeftThisTurn: number = DEFAULT_MOVEMENTS) { }
+    constructor(private movementsLeftThisTurn: number = DEFAULT_MOVEMENTS) { }
 
     move(creature: Creature, to: GameTile, map: GameMap) {
         if (this.canMove()) {

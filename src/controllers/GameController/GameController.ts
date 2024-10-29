@@ -1,17 +1,18 @@
 import GameMap from "@/core/game-map";
-import AbilitiesAndEquipmentsDeck from "../cards/abilities-and-equipments/deck";
-import JungleDeck from "../cards/jungle/deck";
-import Champion from "../creatures/champion";
-import { TargetedEffect } from "../effects/Effect";
-import CreatureController from "./CreatureController/CreatureController";
-import TurnAssignmentController from "./TurnAssignmentController";
+import AbilitiesAndEquipmentsDeck from "../../cards/abilities-and-equipments/deck";
+import JungleDeck from "../../cards/jungle/deck";
+import Champion from "../../creatures/champion";
+import { TargetedEffect } from "../../effects/Effect";
+import CreatureController from "../CreatureController/CreatureController";
+import TurnAssignmentController from "../TurnAssignmentController";
+import CreatureControllers from "./CreatureControllers";
 
 export class GameState {
     constructor(
         public map: GameMap,
         public abilitiesAndEquipmentsDeck: AbilitiesAndEquipmentsDeck,
         public jungleDeck: JungleDeck,
-        public players: CreatureController[],
+        public creatures: CreatureControllers,
         public effectsQueue: EffectsQueue,
     ) { }
 }
@@ -21,28 +22,28 @@ class GameController {
     map = new GameMap(2);
     abilitiesAndEquipmentsDeck = new AbilitiesAndEquipmentsDeck();
     jungleDeck = new JungleDeck();
-    players: CreatureController[] = [];
-    turnController: TurnAssignmentController<CreatureController> = new TurnAssignmentController<CreatureController>(this.players);
+    creatureControllers: CreatureControllers = new CreatureControllers();
+    turnController: TurnAssignmentController<CreatureController> = new TurnAssignmentController<CreatureController>(this.creatureControllers.controllers);
     currentPlayingPlayer: CreatureController = this.turnController.getCurrentTurn();
     effectsQueue = new EffectsQueue();
 
     addPlayer(creature: Champion, team: number) {
         const gameStateBuilder = this.buildGameState;
-        new CreatureController(creature, team, new GameContext(gameStateBuilder));
+        this.creatureControllers.addCreature(new CreatureController(creature, team, new GameContext(gameStateBuilder)));
     }
 
-    removePlayer(player: CreatureController) {
-        if (this.players.length === 1) {
+    removePlayer(controller: CreatureController) {
+        if (this.creatureControllers.length === 1) {
             this.endGame();
             throw new Error('Game already ended');
         }
 
-        if (this.currentPlayingPlayer === player) {
+        if (this.currentPlayingPlayer === controller) {
             this.nextTurn();
         }
 
-        this.players = this.players.filter(p => p !== player);
-        this.turnController.removeTurn(player);
+        this.creatureControllers.removeCreature(controller);
+        this.turnController.removeTurn(controller);
 
         if (this.checkWinCondition()) {
             this.endGame();
@@ -56,11 +57,11 @@ class GameController {
     }
 
     checkWinCondition() {
-        return this.players.length === 1;
+        return this.creatureControllers.length === 1;
     }
 
     startGame() {
-        this.players.forEach(player => player.initGame());
+        this.creatureControllers.forEach(controller => controller.initGame());
         this.playTurn();
     }
 
@@ -78,7 +79,7 @@ class GameController {
             this.map,
             this.abilitiesAndEquipmentsDeck,
             this.jungleDeck,
-            this.players,
+            this.creatureControllers,
             this.effectsQueue,
         );
     }
@@ -96,7 +97,7 @@ export class GameContext {
 }
 
 export class EffectsQueue {
-    private queue: TargetedEffect[] = [];
+    public queue: TargetedEffect[] = [];
 
     push(...effects: TargetedEffect[]) {
         this.queue.push(...effects);
